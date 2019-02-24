@@ -122,37 +122,37 @@ class Application(Application_ui):
         return list
 
     def Add_Listbox_Cmd(self, event=None):
-        self.PoemsListBox.delete(0, END)
+        self.PoemsListBox.delete(0, END)  # 清空列表显示
+
         self.poems = self.data[self.Combo1Var.get()]['诗文'].split('\n')
-        listbox_list = []
+        listboxDisplayList = []
         self.wordtitleDict = collections.OrderedDict()
-        wordlist = []
-        t_title = ''
+        wordTampList = []
+        titleTamp = ''
         for poem in self.poems:
             attr = poem.split('|')
             self.words = attr[0]
             self.title = attr[2] + attr[3]
             self.page = attr[4]
 
-            if self.title != t_title:
-                wordlist.clear()
-            t_title = self.title
-            wordlist.append(self.words)
-            self.wordtitleDict[self.title] = wordlist[:]
-            listbox_list.append(self.title)
-        print(self.wordtitleDict)
+            if self.title != titleTamp:
+                wordTampList.clear()
+            titleTamp = self.title
+            wordTampList.append(self.words)
+            self.wordtitleDict[self.title] = wordTampList[:]
+            listboxDisplayList.append(self.title)
         self.title_list = list(self.wordtitleDict.keys())
 
-        addr = list(set(listbox_list))
-        addr.sort(key=listbox_list.index)
-        for each in addr:
+        listboxDisplayOdr = list(set(listboxDisplayList))
+        listboxDisplayOdr.sort(key=listboxDisplayList.index)
+        for each in listboxDisplayOdr:
             self.PoemsListBox.insert(END, each)
 
 
     def make_questions(self):
         '''数据的读取和解析'''
         listboxIdxTuple = self.PoemsListBox.curselection()
-        wordtitleDictCopy = self.wordtitleDict.copy()
+        wordtitleDictCopy = collections.OrderedDict()
         for each in listboxIdxTuple:
             value = self.wordtitleDict.pop(self.title_list[each])
             wordtitleDictCopy[self.title_list[each]] = value
@@ -202,7 +202,7 @@ class Application(Application_ui):
                 self.questions[num] = str(num+1) + '. ' + self.questions[num]
                 self.answers[num] = str(num+1) + '. ' + self.answers[num]
 
-    def create_docx(self):
+    def create_docx(self, list):
         '''实现文档的创建和内容写入，不包括保存文档'''
         # 创建文档
         doc = Document()
@@ -212,7 +212,7 @@ class Application(Application_ui):
         # 标题内容设置
         title_run = title.add_run(self.Combo1Var.get() + '古诗练习')
         # 正文内容设置
-        for each in self.questions:
+        for each in list:
             psg.add_run(each + '\n')
         # 标题样式设计
         title_run.bold = True  # 粗体
@@ -227,9 +227,9 @@ class Application(Application_ui):
         return doc  # 返回结果
 
     def write_docx(self):
-        question_doc = self.create_docx()
+        question_doc = self.create_docx(self.questions)
         question_doc.save(self.Combo1Var.get() + '诗题.docx')
-        answers_doc = self.create_docx()
+        answers_doc = self.create_docx(self.answers)
         answers_doc.save(self.Combo1Var.get() + '诗题答案.docx')
         showinfo('完成', '文件已经输出到软件根目录，分为答案和题目两个文件。')
 
