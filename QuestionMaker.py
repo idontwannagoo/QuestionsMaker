@@ -108,8 +108,8 @@ class Application(Application_ui):
         self.Check1Var.set(1)
         self.Check2Var.set(1)
         self.Check3Var.set(1)
-
     def Command1_Cmd(self, event=None):
+        self.DataProcessing()
         self.make_questions()
         self.shuffle()
         self.add_number()
@@ -120,31 +120,30 @@ class Application(Application_ui):
             if each == '':
                 list.remove(each)
         return list
-
-    def Add_Listbox_Cmd(self, event=None):
-        self.PoemsListBox.delete(0, END)  # 清空列表显示
-
-        self.poems = self.data[self.Combo1Var.get()]['诗文'].split('\n')
-        listboxDisplayList = []
+    def DataProcessing(self):
+        poems = self.data[self.Combo1Var.get()]['诗文'].split('\n')
+        self.listboxDisplayList = []
         self.wordtitleDict = collections.OrderedDict()
         wordTampList = []
         titleTamp = ''
-        for poem in self.poems:
+        for poem in poems:
             attr = poem.split('|')
-            self.words = attr[0]
-            self.title = attr[2] + attr[3]
-            self.page = attr[4]
+            words = attr[0]
+            title = attr[2] + attr[3]
+            page = attr[4]
 
-            if self.title != titleTamp:
+            if title != titleTamp:
                 wordTampList.clear()
-            titleTamp = self.title
-            wordTampList.append(self.words)
-            self.wordtitleDict[self.title] = wordTampList[:]
-            listboxDisplayList.append(self.title)
+            titleTamp = title
+            wordTampList.append(words)
+            self.wordtitleDict[title] = wordTampList[:]
+            self.listboxDisplayList.append(title)
         self.title_list = list(self.wordtitleDict.keys())
-
-        listboxDisplayOdr = list(set(listboxDisplayList))
-        listboxDisplayOdr.sort(key=listboxDisplayList.index)
+    def Add_Listbox_Cmd(self, event=None):
+        self.DataProcessing()
+        self.PoemsListBox.delete(0, END)  # 清空列表显示
+        listboxDisplayOdr = list(set(self.listboxDisplayList))
+        listboxDisplayOdr.sort(key=self.listboxDisplayList.index)
         for each in listboxDisplayOdr:
             self.PoemsListBox.insert(END, each)
 
