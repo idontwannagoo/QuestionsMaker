@@ -17,6 +17,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.oxml.ns import qn
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.dml import MSO_THEME_COLOR_INDEX
 import collections
 
 class Application_ui(Frame):
@@ -225,8 +226,38 @@ class Application(Application_ui):
         # 标题内容设置
         title_run = title.add_run(self.Combo1Var.get() + '古诗练习')
         # 正文内容设置
+        def add_hyperlink(paragraph, url, text):
+            part = paragraph.part
+            r_id = part.relate_to(url,  docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+            hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+            hyperlink.set(qn('r:id'), r_id, )
+            hyperlink.set(qn('w:history'), '1')
+
+            new_run = docx.oxml.shared.OxmlElement('w:r')
+
+            rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+            rStyle = docx.oxml.shared.OxmlElement('w:rStyle')
+            rStyle.set(qn('w:val'), 'Hyperlink')
+
+            rPr.append(rStyle)
+            new_run.append(rPr)
+            new_run.text = text
+            hyperlink.append(new_run)
+
+            r = paragraph.add_run()
+            r._r.append(hyperlink)
+
+            r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
+            r.font.underline = True
+
+            return r
         for each in list:
-            psg.add_run(each + '\n')
+            psg.add_run(each)
+            titleOfPoem = re.findall(r'《(.*?)》', each)
+            add_hyperlink(psg, text='查看详情', url='https://hanyu.baidu.com/s?wd={}'.format(titleOfPoem[0]))
+            psg.add_run('\n')
         # 标题样式设计
         title_run.bold = True  # 粗体
         title_run.font.size = Pt(16)  # 字号
