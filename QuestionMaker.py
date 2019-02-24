@@ -109,9 +109,19 @@ class Application(Application_ui):
         self.Check2Var.set(1)
         self.Check3Var.set(1)
     def Command1_Cmd(self, event=None):
-        self.DataProcessing()
-        self.make_questions()
-        self.shuffle()
+        try:
+            self.DataProcessing()
+        except KeyError:
+            showerror('参数缺少！', '请确保确认了所有的选项，完成操作后请重试。')
+            return
+
+        if self.make_questions():
+            return
+
+        try:
+            self.shuffle()
+        except ValueError:
+            pass
         self.add_number()
         self.write_docx()
 
@@ -151,6 +161,10 @@ class Application(Application_ui):
     def make_questions(self):
         '''数据的读取和解析'''
         listboxIdxTuple = self.PoemsListBox.curselection()
+        if not listboxIdxTuple:
+            yes_no = askyesno('未选的参数！', '你没有选择任何诗文，这样会生成只有标题的文档，确定吗？', default=NO)
+            if yes_no == False:
+                return 1
         wordtitleDictCopy = collections.OrderedDict()
         for each in listboxIdxTuple:
             value = self.wordtitleDict.pop(self.title_list[each])
