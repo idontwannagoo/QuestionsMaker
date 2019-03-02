@@ -19,6 +19,12 @@ from docx.oxml.ns import qn
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.dml import MSO_THEME_COLOR_INDEX
 import collections
+import os
+import sys
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 class Application_ui(Frame):
     #这个类仅实现界面生成功能，具体事件处理代码在子类Application中。
@@ -103,7 +109,7 @@ class Application(Application_ui):
     #这个类实现具体的事件处理回调函数。界面生成代码在Application_ui中。
     def __init__(self, master=None):
         Application_ui.__init__(self, master)
-        with open('data.json', 'r', encoding='UTF-8') as f:
+        with open(resource_path('data.json'), 'r', encoding='UTF-8') as f:
             self.data = json.load(f)
         self.topRadioVar.set("Option3")
         self.Check1Var.set(1)
